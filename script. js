@@ -1,0 +1,110 @@
+const display = document.getElementById('display');
+const buttons = document.querySelectorAll('.btn');
+
+let currentInput = "";
+
+
+function updateDisplay() {
+    display.value = currentInput;
+}
+
+
+buttons.forEach(button => {
+    button.addEventListener('click', () => {
+        const action = button.getAttribute('data-action');
+
+        if (action === 'clear') {
+            clearAll();
+        } 
+        else if (action === 'delete') {
+            deleteLast();
+        } 
+        else if (action === '=') {
+            calculate();
+        } 
+        else {
+            appendInput(action);
+        }
+
+        updateDisplay();
+    });
+});
+
+
+function appendInput(value) {
+    const operators = ['+', '-', '*', '/'];
+    const lastChar = currentInput.slice(-1);
+
+  
+    if (operators.includes(value)) {
+        if (currentInput === "" || operators.includes(lastChar)) {
+            return;
+        }
+    }
+
+    
+    if (value === '.') {
+        let parts = currentInput.split(/[\+\-\*\/]/);
+        let lastPart = parts[parts.length - 1];
+
+        if (lastPart.includes('.')) return;
+    }
+
+    currentInput += value;
+}
+
+
+function calculate() {
+    try {
+        
+        if (currentInput.includes('/0')) {
+            currentInput = "Error: Division by zero";
+            return;
+        }
+
+        let result = eval(currentInput);
+
+        
+        if (!isFinite(result)) {
+            currentInput = "Error";
+        } else {
+            currentInput = result.toString();
+        }
+
+    } catch (error) {
+        currentInput = "Error: Invalid input";
+    }
+}
+
+
+function clearAll() {
+    currentInput = "";
+}
+
+
+function deleteLast() {
+    currentInput = currentInput.slice(0, -1);
+}
+
+
+document.addEventListener('keydown', (e) => {
+    const key = e.key;
+
+    const validKeys = "0123456789+-*/.";
+
+    if (validKeys.includes(key)) {
+        appendInput(key);
+    } 
+    else if (key === "Enter") {
+        e.preventDefault();
+        calculate();
+    } 
+    else if (key === "Backspace") {
+        deleteLast();
+    } 
+    else if (key === "Delete") {
+        clearAll();
+    }
+
+    updateDisplay();
+});
